@@ -1,0 +1,126 @@
+/* Coffee Brain App Styles */
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Global App Enhancements */
+* {
+  box-sizing: border-box;
+}
+
+/* Smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep functionality */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rich-gold) var(--light-grey);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--light-grey);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--rich-gold);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--hover-gold);
+}
+
+/* Focus outline for accessibility */
+*:focus {
+  outline: 2px solid var(--rich-gold);
+  outline-offset: 2px;
+}
+
+/* Remove default button outlines but keep for keyboard users */
+button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Ensure images are responsive by default */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Typography improvements */
+strong {
+  font-weight: 600;
+}
+
+/* Link styling */
+a {
+  color: inherit;
+  transition: var(--transition);
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--rich-gold);
+  color: var(--white);
+}
+
+::-moz-selection {
+  background-color: var(--rich-gold);
+  color: var(--white);
+}
+
+/* Print styles */
+@media print {
+  .navbar,
+  .mobile-nav,
+  .btn,
+  .admin-nav {
+    display: none !important;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --rich-gold: #8B6914;
+    --charcoal-black: #000000;
+    --white: #FFFFFF;
+  }
+}
+
+/* Dark mode support (if user prefers) */
+@media (prefers-color-scheme: dark) {
+  /* Note: Coffee Brain uses light theme for brand consistency */
+  /* This can be expanded if dark mode is desired */
+}
