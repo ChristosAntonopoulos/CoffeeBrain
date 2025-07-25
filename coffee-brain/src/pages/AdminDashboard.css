@@ -1,0 +1,122 @@
+/* Admin Dashboard Styles */
+
+.admin-dashboard {
+  padding-top: 120px;
+  padding-bottom: var(--spacing-xxl);
+  min-height: 100vh;
+  background-color: var(--light-grey);
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xxl);
+}
+
+.dashboard-header h1 {
+  color: var(--charcoal-black);
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-header p {
+  color: var(--rich-gold);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.dashboard-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.dashboard-grid {
+  margin-bottom: var(--spacing-xxl);
+}
+
+.dashboard-card {
+  text-align: center;
+  transition: var(--transition);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard-card h3 {
+  color: var(--charcoal-black);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.dashboard-card p {
+  color: var(--medium-grey);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.admin-info {
+  background-color: var(--white);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+}
+
+.admin-info h2 {
+  color: var(--charcoal-black);
+  margin-bottom: var(--spacing-md);
+}
+
+.admin-info p {
+  color: var(--dark-grey);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.admin-info ul {
+  color: var(--dark-grey);
+  line-height: 1.8;
+  padding-left: var(--spacing-lg);
+}
+
+.admin-info li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.logout-section {
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding-top: 100px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 2rem;
+  }
+  
+  .dashboard-header p {
+    font-size: 1.1rem;
+  }
+  
+  .admin-info {
+    padding: var(--spacing-lg);
+  }
+  
+  .dashboard-card h3 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .admin-info {
+    padding: var(--spacing-md);
+  }
+}
