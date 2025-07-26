@@ -27,6 +27,9 @@ stages:
   jobs:
   - job: Build
     displayName: 'Build React App'
+    pool:
+      name: 'Default'
+    
     steps:
     - task: NodeTool@0
       inputs:
@@ -56,17 +59,18 @@ stages:
   jobs:
   - job: DockerBuild
     displayName: 'Build and Push Docker Image'
+    pool:
+      name: 'Default'
+    
     steps:
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'your-acr-connection' # TODO: Replace with your ACR connection
-        repository: $(imageName)
-        command: 'buildAndPush'
-        Dockerfile: 'coffee-brain/$(dockerfilePath)'
-        tags: |
-          $(imageTag)
-          latest
-      displayName: 'Build and Push Docker Image'
+    - script: |
+        docker build -t $(imageName):$(imageTag) -t $(imageName):latest -f coffee-brain/$(dockerfilePath) coffee-brain/
+      displayName: 'Build Docker image'
+    
+    - script: |
+        docker push $(imageName):$(imageTag)
+        docker push $(imageName):latest
+      displayName: 'Push Docker images'
 
 - stage: Deploy
   displayName: 'Deploy to Kubernetes'
@@ -76,19 +80,23 @@ stages:
   - job: DeployToK8s
     displayName: 'Deploy to Kubernetes'
     pool:
-      name: 'default'  # Use your default agent
+      name: 'Default'
+    
     steps:
-    - task: KubernetesManifest@0
-      inputs:
-        action: 'deploy'
-        kubernetesServiceConnection: 'your-k8s-connection' # TODO: Replace with your K8s connection
-        namespace: $(k8sNamespace)
-        manifests: |
-          $(Pipeline.Workspace)/coffee-brain/k8s/deployment.yaml
-          $(Pipeline.Workspace)/coffee-brain/k8s/service.yaml
-          $(Pipeline.Workspace)/coffee-brain/k8s/ingress.yaml
-        containers: |
-          $(imageName):$(imageTag)
+    - script: |
+        # Deploy to Kubernetes
+        echo "Starting deployment process..."
+        
+        # Create namespace first
+        kubectl apply -f coffee-brain/k8s/namespace.yaml
+        
+        # Deploy the application
+        kubectl apply -f coffee-brain/k8s/deployment.yaml
+        kubectl apply -f coffee-brain/k8s/service.yaml
+        kubectl apply -f coffee-brain/k8s/ingress.yaml
+        
+        # Wait for deployment
+        kubectl rollout status deployment/coffee-brain -n $(k8sNamespace) --timeout=300s
       displayName: 'Deploy to Kubernetes'
 
 # Alternative: Deploy via SSH to Ubuntu server
@@ -100,29 +108,26 @@ stages:
   - job: DeployViaSSH
     displayName: 'Deploy to Ubuntu Server via SSH'
     pool:
-      name: 'default'  # Use your default agent
+      name: 'Default'
+    
     steps:
-    - task: SSH@0
-      inputs:
-        sshEndpoint: 'your-ssh-connection' # TODO: Replace with your SSH service connection
-        runOptions: 'commands'
-        commands: |
-          # Pull the latest image
-          docker pull your-registry.azurecr.io/$(imageName):$(imageTag)
-          
-          # Stop and remove existing container
-          docker stop coffee-brain || true
-          docker rm coffee-brain || true
-          
-          # Run new container
-          docker run -d \
-            --name coffee-brain \
-            --restart unless-stopped \
-            -p 80:80 \
-            your-registry.azurecr.io/$(imageName):$(imageTag)
-          
-          # Clean up old images
-          docker image prune -f
+    - script: |
+        # Pull the latest image
+        docker pull $(imageName):$(imageTag)
+        
+        # Stop and remove existing container
+        docker stop coffee-brain || true
+        docker rm coffee-brain || true
+        
+        # Run new container
+        docker run -d \
+          --name coffee-brain \
+          --restart unless-stopped \
+          -p 80:80 \
+          $(imageName):$(imageTag)
+        
+        # Clean up old images
+        docker image prune -f
       displayName: 'Deploy via SSH'
 
 # Alternative: Deploy to Azure App Service
@@ -134,20 +139,20 @@ stages:
   - job: DeployToAppService
     displayName: 'Deploy to Azure App Service'
     pool:
-      name: 'default'  # Use your default agent
+      name: 'Default'
+    
     steps:
-    - task: ArchiveFiles@2
-      inputs:
-        rootFolderOrFile: 'coffee-brain/build'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-        replaceExistingArchive: true
+    - script: |
+        # Create deployment package
+        cd coffee-brain/build
+        zip -r ../coffee-brain-$(Build.BuildId).zip .
+        cd ..
       displayName: 'Create deployment package'
     
-    - task: AzureWebApp@1
-      inputs:
-        azureSubscription: 'your-azure-subscription' # TODO: Replace with your Azure subscription
-        appName: 'your-app-service-name' # TODO: Replace with your App Service name
-        package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    - script: |
+        # Deploy to Azure App Service
+        az webapp deployment source config-zip \
+          --resource-group your-resource-group \
+          --name your-app-service-name \
+          --src coffee-brain/coffee-brain-$(Build.BuildId).zip
       displayName: 'Deploy to Azure App Service' 
