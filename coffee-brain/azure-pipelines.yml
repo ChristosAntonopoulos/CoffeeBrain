@@ -17,11 +17,6 @@ variables:
   # Kubernetes variables
   k8sNamespace: 'coffee-brain'
   k8sConfigPath: 'k8s/'
-  
-  # Server variables (replace with your actual values)
-  serverHost: 'your-ubuntu-server.com'
-  serverUser: 'ubuntu'
-  serverKeyPath: '$(System.DefaultWorkingDirectory)/ssh-key'
 
 stages:
 - stage: Build
@@ -36,16 +31,18 @@ stages:
       displayName: 'Install Node.js'
     
     - script: |
+        cd coffee-brain
         npm install
       displayName: 'Install Dependencies'
     
     - script: |
+        cd coffee-brain
         npm run build
       displayName: 'Build React App'
     
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: 'build'
+        pathToPublish: 'coffee-brain/build'
         artifactName: 'drop'
       displayName: 'Publish Build Artifacts'
 
@@ -58,10 +55,10 @@ stages:
     steps:
     - task: Docker@2
       inputs:
-        containerRegistry: 'your-acr-connection' # Replace with your ACR connection
+        containerRegistry: 'your-acr-connection' # TODO: Replace with your Azure Container Registry connection
         repository: $(imageName)
         command: 'buildAndPush'
-        Dockerfile: $(dockerfilePath)
+        Dockerfile: 'coffee-brain/$(dockerfilePath)'
         tags: |
           $(imageTag)
           latest
@@ -73,7 +70,7 @@ stages:
   jobs:
   - deployment: DeployToK8s
     displayName: 'Deploy to Kubernetes'
-    environment: 'production' # Replace with your environment name
+    environment: 'production' # TODO: Replace with your environment name
     strategy:
       runOnce:
         deploy:
@@ -81,88 +78,77 @@ stages:
           - task: KubernetesManifest@0
             inputs:
               action: 'deploy'
-              kubernetesServiceConnection: 'your-k8s-connection' # Replace with your K8s connection
+              kubernetesServiceConnection: 'your-k8s-connection' # TODO: Replace with your K8s connection
               namespace: $(k8sNamespace)
               manifests: |
-                $(Pipeline.Workspace)/k8s/deployment.yaml
-                $(Pipeline.Workspace)/k8s/service.yaml
-                $(Pipeline.Workspace)/k8s/ingress.yaml
+                $(Pipeline.Workspace)/coffee-brain/k8s/deployment.yaml
+                $(Pipeline.Workspace)/coffee-brain/k8s/service.yaml
+                $(Pipeline.Workspace)/coffee-brain/k8s/ingress.yaml
               containers: |
                 $(imageName):$(imageTag)
             displayName: 'Deploy to Kubernetes'
 
-          - task: Kubernetes@1
-            inputs:
-              connectionType: 'Azure Resource Manager'
-              azureSubscriptionEndpoint: 'your-azure-subscription' # Replace with your Azure subscription
-              azureContainerRegistry: 'your-acr-connection' # Replace with your ACR connection
-              kubernetesCluster: 'your-aks-cluster' # Replace with your AKS cluster
-              namespace: $(k8sNamespace)
-              command: 'set image'
-              arguments: 'deployment/coffee-brain coffee-brain=$(imageName):$(imageTag)'
-            displayName: 'Update Image Tag'
-
-# Alternative deployment using SSH if you're deploying to a self-hosted Kubernetes cluster
+# Alternative: Deploy via SSH to Ubuntu server
 - stage: DeploySSH
   displayName: 'Deploy via SSH (Alternative)'
   dependsOn: Docker
-  condition: and(succeeded(), eq(variables['deployMethod'], 'ssh'))
+  condition: eq(variables['deployMethod'], 'ssh')
   jobs:
-  - job: DeployViaSSH
-    displayName: 'Deploy via SSH'
-    steps:
-    - task: CopyFiles@2
-      inputs:
-        sourceFolder: '$(Pipeline.Workspace)/k8s'
-        contents: '**'
-        targetFolder: '$(Build.ArtifactStagingDirectory)/k8s'
-      displayName: 'Copy K8s Manifests'
-    
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)/k8s'
-        artifactName: 'k8s-manifests'
-      displayName: 'Publish K8s Manifests'
-    
-    - task: SSH@0
-      inputs:
-        sshEndpoint: 'your-ssh-endpoint' # Replace with your SSH service connection
-        runOptions: 'commands'
-        commands: |
-          # Update the deployment with new image
-          kubectl set image deployment/coffee-brain coffee-brain=$(imageName):$(imageTag) -n $(k8sNamespace)
-          
-          # Apply any config changes
-          kubectl apply -f k8s/ -n $(k8sNamespace)
-          
-          # Check deployment status
-          kubectl rollout status deployment/coffee-brain -n $(k8sNamespace)
-        displayName: 'Deploy via SSH'
+  - deployment: DeployViaSSH
+    displayName: 'Deploy to Ubuntu Server via SSH'
+    environment: 'production-ssh'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: SSH@0
+            inputs:
+              sshEndpoint: 'your-ssh-connection' # TODO: Replace with your SSH service connection
+              runOptions: 'commands'
+              commands: |
+                # Pull the latest image
+                docker pull your-registry.azurecr.io/$(imageName):$(imageTag)
+                
+                # Stop and remove existing container
+                docker stop coffee-brain || true
+                docker rm coffee-brain || true
+                
+                # Run new container
+                docker run -d \
+                  --name coffee-brain \
+                  --restart unless-stopped \
+                  -p 80:80 \
+                  your-registry.azurecr.io/$(imageName):$(imageTag)
+                
+                # Clean up old images
+                docker image prune -f
+            displayName: 'Deploy via SSH'
 
-# Post-deployment verification
-- stage: Verify
-  displayName: 'Verify Deployment'
-  dependsOn: Deploy
+# Alternative: Deploy to Azure App Service
+- stage: DeployAppService
+  displayName: 'Deploy to Azure App Service'
+  dependsOn: Build
+  condition: eq(variables['deployMethod'], 'appservice')
   jobs:
-  - job: VerifyDeployment
-    displayName: 'Verify Deployment'
-    steps:
-    - task: Kubernetes@1
-      inputs:
-        connectionType: 'Azure Resource Manager'
-        azureSubscriptionEndpoint: 'your-azure-subscription'
-        kubernetesCluster: 'your-aks-cluster'
-        namespace: $(k8sNamespace)
-        command: 'get'
-        arguments: 'pods -l app=coffee-brain'
-      displayName: 'Check Pod Status'
-    
-    - task: Kubernetes@1
-      inputs:
-        connectionType: 'Azure Resource Manager'
-        azureSubscriptionEndpoint: 'your-azure-subscription'
-        kubernetesCluster: 'your-aks-cluster'
-        namespace: $(k8sNamespace)
-        command: 'get'
-        arguments: 'services -l app=coffee-brain'
-      displayName: 'Check Service Status' 
+  - deployment: DeployToAppService
+    displayName: 'Deploy to Azure App Service'
+    environment: 'production-appservice'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: 'coffee-brain/build'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+              replaceExistingArchive: true
+            displayName: 'Create deployment package'
+          
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'your-azure-subscription' # TODO: Replace with your Azure subscription
+              appName: 'your-app-service-name' # TODO: Replace with your App Service name
+              package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+            displayName: 'Deploy to Azure App Service' 
