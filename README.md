@@ -8,6 +8,7 @@ A modern, elegant website for Coffee Brain, a premium coffeehouse in Filiatra, G
 - **Typography**: Playfair Display (serif) for headings, Inter (sans-serif) for body text
 - **Responsive Design**: Mobile-first approach with smooth animations
 - **Modern UX**: Sleek hover effects, smooth transitions, and intuitive navigation
+- **Bilingual Support**: Full Greek and English language support
 
 ## 🏗️ Architecture
 
@@ -30,6 +31,7 @@ A modern, elegant website for Coffee Brain, a premium coffeehouse in Filiatra, G
 - **Styling**: CSS Variables with modern CSS features
 - **Authentication**: Mock JWT-based authentication
 - **API**: Mock REST API with realistic data
+- **CI/CD**: Azure DevOps pipeline for automated deployment
 
 ## 📱 Features
 
@@ -132,6 +134,10 @@ src/
 - Social media integration
 - Multi-language support (Greek/English)
 - Advanced photo management tools
+
+## ☕ Coffee Information
+
+Coffee Brain proudly serves **La Meloise Espresso**, a premium coffee that embodies our passion for high-quality coffee, accessible to everyone. The selection of the best Arabica beans and their blending with high-quality Robusta beans combine in an excellent coffee blend that leads to a strong and full-flavored experience.
 
 ---
 
