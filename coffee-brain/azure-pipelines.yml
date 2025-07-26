@@ -17,6 +17,9 @@ variables:
   # Kubernetes variables
   k8sNamespace: 'coffee-brain'
   k8sConfigPath: 'k8s/'
+  
+  # Deployment method - change this to your preferred method
+  deployMethod: 'appservice'  # Options: 'kubernetes', 'ssh', 'appservice'
 
 stages:
 - stage: Build
@@ -49,13 +52,14 @@ stages:
 - stage: Docker
   displayName: 'Build Docker Image'
   dependsOn: Build
+  condition: eq(variables['deployMethod'], 'kubernetes')
   jobs:
   - job: DockerBuild
     displayName: 'Build and Push Docker Image'
     steps:
     - task: Docker@2
       inputs:
-        containerRegistry: 'your-acr-connection' # TODO: Replace with your Azure Container Registry connection
+        containerRegistry: 'your-acr-connection' # TODO: Replace with your ACR connection
         repository: $(imageName)
         command: 'buildAndPush'
         Dockerfile: 'coffee-brain/$(dockerfilePath)'
@@ -67,62 +71,59 @@ stages:
 - stage: Deploy
   displayName: 'Deploy to Kubernetes'
   dependsOn: Docker
+  condition: eq(variables['deployMethod'], 'kubernetes')
   jobs:
-  - deployment: DeployToK8s
+  - job: DeployToK8s
     displayName: 'Deploy to Kubernetes'
-    environment: 'production' # TODO: Replace with your environment name
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: KubernetesManifest@0
-            inputs:
-              action: 'deploy'
-              kubernetesServiceConnection: 'your-k8s-connection' # TODO: Replace with your K8s connection
-              namespace: $(k8sNamespace)
-              manifests: |
-                $(Pipeline.Workspace)/coffee-brain/k8s/deployment.yaml
-                $(Pipeline.Workspace)/coffee-brain/k8s/service.yaml
-                $(Pipeline.Workspace)/coffee-brain/k8s/ingress.yaml
-              containers: |
-                $(imageName):$(imageTag)
-            displayName: 'Deploy to Kubernetes'
+    pool:
+      name: 'default'  # Use your default agent
+    steps:
+    - task: KubernetesManifest@0
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'your-k8s-connection' # TODO: Replace with your K8s connection
+        namespace: $(k8sNamespace)
+        manifests: |
+          $(Pipeline.Workspace)/coffee-brain/k8s/deployment.yaml
+          $(Pipeline.Workspace)/coffee-brain/k8s/service.yaml
+          $(Pipeline.Workspace)/coffee-brain/k8s/ingress.yaml
+        containers: |
+          $(imageName):$(imageTag)
+      displayName: 'Deploy to Kubernetes'
 
 # Alternative: Deploy via SSH to Ubuntu server
 - stage: DeploySSH
   displayName: 'Deploy via SSH (Alternative)'
-  dependsOn: Docker
+  dependsOn: Build
   condition: eq(variables['deployMethod'], 'ssh')
   jobs:
-  - deployment: DeployViaSSH
+  - job: DeployViaSSH
     displayName: 'Deploy to Ubuntu Server via SSH'
-    environment: 'production-ssh'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: SSH@0
-            inputs:
-              sshEndpoint: 'your-ssh-connection' # TODO: Replace with your SSH service connection
-              runOptions: 'commands'
-              commands: |
-                # Pull the latest image
-                docker pull your-registry.azurecr.io/$(imageName):$(imageTag)
-                
-                # Stop and remove existing container
-                docker stop coffee-brain || true
-                docker rm coffee-brain || true
-                
-                # Run new container
-                docker run -d \
-                  --name coffee-brain \
-                  --restart unless-stopped \
-                  -p 80:80 \
-                  your-registry.azurecr.io/$(imageName):$(imageTag)
-                
-                # Clean up old images
-                docker image prune -f
-            displayName: 'Deploy via SSH'
+    pool:
+      name: 'default'  # Use your default agent
+    steps:
+    - task: SSH@0
+      inputs:
+        sshEndpoint: 'your-ssh-connection' # TODO: Replace with your SSH service connection
+        runOptions: 'commands'
+        commands: |
+          # Pull the latest image
+          docker pull your-registry.azurecr.io/$(imageName):$(imageTag)
+          
+          # Stop and remove existing container
+          docker stop coffee-brain || true
+          docker rm coffee-brain || true
+          
+          # Run new container
+          docker run -d \
+            --name coffee-brain \
+            --restart unless-stopped \
+            -p 80:80 \
+            your-registry.azurecr.io/$(imageName):$(imageTag)
+          
+          # Clean up old images
+          docker image prune -f
+      displayName: 'Deploy via SSH'
 
 # Alternative: Deploy to Azure App Service
 - stage: DeployAppService
@@ -130,25 +131,23 @@ stages:
   dependsOn: Build
   condition: eq(variables['deployMethod'], 'appservice')
   jobs:
-  - deployment: DeployToAppService
+  - job: DeployToAppService
     displayName: 'Deploy to Azure App Service'
-    environment: 'production-appservice'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: ArchiveFiles@2
-            inputs:
-              rootFolderOrFile: 'coffee-brain/build'
-              includeRootFolder: false
-              archiveType: 'zip'
-              archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-              replaceExistingArchive: true
-            displayName: 'Create deployment package'
-          
-          - task: AzureWebApp@1
-            inputs:
-              azureSubscription: 'your-azure-subscription' # TODO: Replace with your Azure subscription
-              appName: 'your-app-service-name' # TODO: Replace with your App Service name
-              package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-            displayName: 'Deploy to Azure App Service' 
+    pool:
+      name: 'default'  # Use your default agent
+    steps:
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: 'coffee-brain/build'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+      displayName: 'Create deployment package'
+    
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: 'your-azure-subscription' # TODO: Replace with your Azure subscription
+        appName: 'your-app-service-name' # TODO: Replace with your App Service name
+        package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      displayName: 'Deploy to Azure App Service' 
