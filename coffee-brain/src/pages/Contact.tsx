@@ -2,63 +2,64 @@
 
 import React from 'react';
 import './Contact.css';
+import { useI18n } from '../components/I18nContext';
 
 const Contact: React.FC = () => {
+  const { t } = useI18n();
   return (
     <div className="contact-page">
       <div className="container">
         {/* Header */}
         <div className="contact-header text-center">
-          <h1>Contact Us</h1>
+          <h1>{t('contactUs')}</h1>
           <p className="contact-description">
-            We'd love to hear from you. Visit us in Filiatra or get in touch to learn more 
-            about Coffee Brain and our commitment to exceptional coffee experiences.
+            {t('contactDescription')}
           </p>
         </div>
 
         {/* Contact Info */}
         <div className="contact-content grid grid-2">
           <div className="contact-info">
-            <h2>Visit Coffee Brain</h2>
+            <h2>{t('visit')}</h2>
             
             <div className="info-section">
-              <h3>📍 Address</h3>
-              <p>Central Square<br />Filiatra, Messinia<br />Greece</p>
+              <h3>📍 {t('address')}</h3>
+              <p>Filiatra, Messinia<br />Greece</p>
             </div>
             
             <div className="info-section">
-              <h3>🕒 Opening Hours</h3>
+              <h3>🕒 {t('hours')}</h3>
               <div className="hours">
                 <div className="hour-item">
-                  <span>Monday - Friday</span>
-                  <span>7:00 AM - 11:00 PM</span>
+                  <span>{t('weekday')}</span>
+                  <span>{t('weekdayHours')}</span>
                 </div>
                 <div className="hour-item">
-                  <span>Saturday - Sunday</span>
-                  <span>8:00 AM - 11:00 PM</span>
+                  <span>{t('weekend')}</span>
+                  <span>{t('weekendHours')}</span>
                 </div>
               </div>
             </div>
             
             <div className="info-section">
-              <h3>📞 Contact Info</h3>
-              <p>Phone: +30 27630 XXXXX<br />
-                 Email: info@coffeebrain.gr</p>
+              <h3>📞 {t('contactInfo')}</h3>
+              <p>{t('phone')}: +30 694 993 5364 / +30 27610 33040<br />
+                 {t('email')}: info@coffeebrain.gr</p>
             </div>
             
             <div className="info-section">
-              <h3>🌐 Follow Us</h3>
+              <h3>🌐 {t('followUs')}</h3>
               <div className="social-links">
-                <a href="#" className="social-link">Facebook</a>
-                <a href="#" className="social-link">Instagram</a>
+                <a href="https://web.facebook.com/profile.php?id=100063554229766" className="social-link" target="_blank" rel="noopener noreferrer">{t('facebook')}</a>
+                <a href="https://www.instagram.com/_coffee_brain/" className="social-link" target="_blank" rel="noopener noreferrer">{t('instagram')}</a>
               </div>
             </div>
           </div>
           
           <div className="location-map">
             <div className="map-placeholder">
-              <h3>Find Us in Filiatra</h3>
-              <p>Located in the heart of Filiatra's central square, Coffee Brain is easily accessible and surrounded by the charming atmosphere of this historic Greek town.</p>
+              <h3>{t('findUs')}</h3>
+              <p>{t('findUsDesc')}</p>
               <div className="map-image">
                 <img 
                   src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1261&q=80"
@@ -72,16 +73,16 @@ const Contact: React.FC = () => {
 
         {/* CTA */}
         <div className="contact-cta text-center">
-          <h2>Ready to Experience Coffee Brain?</h2>
+          <h2>{t('ready')}</h2>
           <p>
-            Come and discover what makes our coffee shop special. We're looking forward to serving you!
+            {t('readyDesc')}
           </p>
           <div className="cta-buttons">
             <a href="/menu" className="btn btn-primary">
-              View Our Menu
+              {t('viewMenu')}
             </a>
             <a href="/gallery" className="btn btn-ghost">
-              See Our Gallery
+              {t('seeGallery')}
             </a>
           </div>
         </div>

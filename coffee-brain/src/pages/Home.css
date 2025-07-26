@@ -1,5 +1,9 @@
 /* Home Page Styles */
 
+.home-page {
+  padding-top: 120px; /* Account for fixed navbar */
+}
+
 .home {
   padding-top: 80px; /* Account for fixed navbar */
 }
@@ -20,7 +24,6 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1047&q=80');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -88,6 +91,34 @@
   justify-content: center;
   flex-wrap: wrap;
   animation-delay: 0.8s;
+}
+
+/* Home Header */
+.home-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xxl);
+  padding-top: var(--spacing-lg);
+}
+
+.banner-image {
+  max-width: 320px;
+  border-radius: 2rem;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+  display: block;
+}
+
+.home-header h1 {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.home-description {
+  font-size: 1.2rem;
+  color: var(--medium-grey);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 /* Features Section */
@@ -214,9 +245,12 @@
 }
 
 .cta-content p {
-  font-size: 1.2rem;
-  margin-bottom: var(--spacing-xl);
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-lg);
   color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cta-buttons {
@@ -238,6 +272,14 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .home-page {
+    padding-top: 100px;
+  }
+  
+  .home {
+    padding-top: 80px;
+  }
+  
   .hero-title {
     font-size: 2.5rem;
   }
@@ -247,7 +289,7 @@
   }
   
   .hero-subtitle {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   
   .hero-description {
@@ -259,9 +301,16 @@
     align-items: center;
   }
   
-  .hero-buttons .btn {
-    width: 100%;
-    max-width: 300px;
+  .banner-image {
+    max-width: 280px;
+  }
+  
+  .home-header h1 {
+    font-size: 2rem;
+  }
+  
+  .home-description {
+    font-size: 1.1rem;
   }
   
   .location-content {
@@ -276,22 +325,17 @@
     font-size: 2rem;
   }
   
-  .cta-content p {
-    font-size: 1.1rem;
-  }
-  
-  .detail-item {
+  .cta-buttons {
     flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-  }
-  
-  .detail-item strong {
-    min-width: auto;
+    align-items: center;
   }
 }
 
 @media (max-width: 480px) {
+  .home-page {
+    padding-top: 90px;
+  }
+  
   .hero-title {
     font-size: 2rem;
   }
@@ -300,17 +344,24 @@
     font-size: 2.5rem;
   }
   
-  .hero-subtitle {
-    font-size: 1.1rem;
+  .banner-image {
+    max-width: 240px;
   }
   
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
+  .home-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .home-description {
+    font-size: 1rem;
   }
   
   .location-img {
     height: 250px;
+  }
+  
+  .cta-content h2 {
+    font-size: 1.8rem;
   }
 }
 

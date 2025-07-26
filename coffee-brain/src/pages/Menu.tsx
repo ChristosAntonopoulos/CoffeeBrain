@@ -4,15 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { MenuItem } from '../types';
 import { getMenuItems } from '../api';
 import './Menu.css';
-
-const categoryNames = {
-  'coffee': '☕ Coffee',
-  'cold-drinks': '🧊 Cold Drinks',
-  'pastry': '🥐 Pastries',
-  'snacks': '🥪 Snacks'
-};
+import { useI18n } from '../components/I18nContext';
 
 const Menu: React.FC = () => {
+  const { t } = useI18n();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -58,12 +53,19 @@ const Menu: React.FC = () => {
         <div className="container">
           <div className="loading-state">
             <div className="loading-spinner"></div>
-            <p>Loading menu...</p>
+            <p>{t('loadingMenu') || 'Loading menu...'}</p>
           </div>
         </div>
       </div>
     );
   }
+
+  const categoryNames = {
+    'coffee': t('coffeeCat') || '☕ Coffee',
+    'cold-drinks': t('coldDrinksCat') || '🧊 Cold Drinks',
+    'pastry': t('pastriesCat') || '🥐 Pastries',
+    'snacks': t('snacksCat') || '🥪 Snacks'
+  };
 
   return (
     <div className="menu-page">
@@ -167,17 +169,16 @@ const Menu: React.FC = () => {
 
         {/* Order CTA */}
         <div className="order-cta text-center">
-          <h2>Ready to Order?</h2>
+          <h2>{t('orderReady') || 'Ready to Order?'}</h2>
           <p>
-            Visit us at Coffee Brain to experience these delicious offerings in person. 
-            Our friendly staff is ready to craft your perfect coffee moment.
+            {t('orderDesc') || 'Visit us at Coffee Brain to experience these delicious offerings in person. Our friendly staff is ready to craft your perfect coffee moment.'}
           </p>
           <div className="cta-buttons">
             <a href="/contact" className="btn btn-primary">
-              Visit Us Today
+              {t('visitUsToday') || 'Visit Us Today'}
             </a>
             <a href="/gallery" className="btn btn-ghost">
-              See Our Space
+              {t('seeOurSpace') || 'See Our Space'}
             </a>
           </div>
         </div>

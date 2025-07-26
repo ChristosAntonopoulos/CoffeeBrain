@@ -111,7 +111,7 @@ export const mockMenuItems: MenuItem[] = [
     description: "Buttery, flaky French pastry",
     price: 2.80,
     category: "pastry",
-    image: "https://images.unsplash.com/photo-1555507036-ac1c2147c1d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
   },
   {
     id: 10,

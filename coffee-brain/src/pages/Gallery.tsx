@@ -4,122 +4,61 @@ import React, { useState, useEffect } from 'react';
 import { Photo } from '../types';
 import { getPhotos } from '../api';
 import './Gallery.css';
+import { useI18n } from '../components/I18nContext';
+
+const galleryImages = [
+  'SnapInsta.to_311940543_1546470722450390_5313371374381523834_n.jpg',
+  'SnapInsta.to_311926268_1529289117543169_8638489726523464406_n.jpg',
+  'SnapInsta.to_285224903_784202092570923_3202818457505558312_n.jpg',
+  'SnapInsta.to_283132169_424994539047427_8630780933111777388_n.jpg',
+  'SnapInsta.to_280183541_505171484668182_2531911976832598105_n.jpg',
+  'SnapInsta.to_279809295_588672622196452_7035299509230636688_n.jpg',
+  'SnapInsta.to_278246130_3223717677863584_7219853074333732750_n.jpg',
+  'SnapInsta.to_278359240_459140419342901_4760616477051259950_n.jpg',
+  '497930233_1266354982159631_9002287888213507124_n.jpg',
+  '494352994_1251034377025025_249038983388217234_n.jpg',
+  '116401504_135688918214144_8461933756883007571_n.jpg',
+  '116263924_135077868275249_777314005825685295_n.jpg',
+  '110211937_130336815416021_7102193400793219717_n.jpg',
+];
 
 const Gallery: React.FC = () => {
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-
-  useEffect(() => {
-    const fetchPhotos = async () => {
-      try {
-        const response = await getPhotos();
-        setPhotos(response.data);
-      } catch (error) {
-        console.error('Failed to fetch photos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPhotos();
-  }, []);
-
-  const openModal = (photo: Photo) => {
-    setSelectedPhoto(photo);
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeModal = () => {
-    setSelectedPhoto(null);
-    document.body.style.overflow = 'unset';
-  };
-
-  if (loading) {
-    return (
-      <div className="gallery-page">
-        <div className="container">
-          <div className="loading-state">
-            <div className="loading-spinner"></div>
-            <p>Loading gallery...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  const { t } = useI18n();
+  // Remove API and state logic for fetching images
   return (
     <div className="gallery-page">
       <div className="container">
         {/* Header */}
         <div className="gallery-header text-center">
-          <h1>Gallery</h1>
+          <h1>{t('gallery') || 'Gallery'}</h1>
           <p className="gallery-description">
-            Take a visual journey through Coffee Brain. Explore our elegant interior, 
-            artisanal coffee creations, and the warm atmosphere that makes us special.
+            {t('galleryDesc') || 'Take a visual journey through Coffee Brain. Explore our elegant interior, artisanal coffee creations, and the warm atmosphere that makes us special.'}
           </p>
         </div>
-
         {/* Photo Grid */}
         <div className="gallery-grid">
-          {photos.map((photo, index) => (
+          {galleryImages.map((filename, index) => (
             <div 
-              key={photo.id} 
+              key={filename} 
               className={`gallery-item fade-in`}
               style={{ animationDelay: `${index * 0.1}s` }}
-              onClick={() => openModal(photo)}
             >
               <div className="gallery-image-container">
                 <img 
-                  src={photo.url} 
-                  alt={photo.description}
+                  src={`/images/${filename}`} 
+                  alt={`Coffee Brain gallery ${index + 1}`}
                   className="gallery-image"
                   loading="lazy"
                 />
                 <div className="gallery-overlay">
                   <div className="gallery-overlay-content">
-                    <h3>{photo.description}</h3>
-                    <span className="view-text">Click to view</span>
+                    <h3>{t('gallery') || 'Gallery'}</h3>
+                    <span className="view-text">{t('clickToView') || 'Click to view'}</span>
                   </div>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Modal */}
-        {selectedPhoto && (
-          <div className="modal-overlay" onClick={closeModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={closeModal}>
-                ×
-              </button>
-              <img 
-                src={selectedPhoto.url} 
-                alt={selectedPhoto.description}
-                className="modal-image"
-              />
-              <div className="modal-info">
-                <h3>{selectedPhoto.description}</h3>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Call to Action */}
-        <div className="gallery-cta text-center">
-          <h2>Visit Us Today</h2>
-          <p>
-            Experience the atmosphere in person. We'd love to welcome you to Coffee Brain.
-          </p>
-          <div className="cta-buttons">
-            <a href="/menu" className="btn btn-primary">
-              View Menu
-            </a>
-            <a href="/contact" className="btn btn-ghost">
-              Get Directions
-            </a>
-          </div>
         </div>
       </div>
     </div>
